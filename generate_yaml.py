@@ -1,30 +1,30 @@
 minionTemplate = "      master: somehost\n      id: {MINIONNAME}"
 params = [
-    ["vmwareTemplateName", "group-1",
+    ["group-1", "vmwareTemplateName",
      [
          ["VMname1", 4, 32, ["hostname1", "domain", "127.0.0.10", "255.255.255.0", "127.0.0.1", "dns_separated"],
           [
-              ["vlanName1", True],
-              ["vlanName2", True]
+              ["vlanName1", "distributed"],
+              ["vlanName2", "distributed"]
           ],
           [
-              [890, "t1"],
-              [987, "t2"]
+              [890, True],
+              [987, True]
           ],
           minionTemplate],
          ["host2", 4, 16, ["127.0.0.10", "127.0.0.1", "255.255.255.0", "dns1", "dns2"],
           [
-              ["vlanName1", True],
-              ["vlanName2", False]
+              ["vlanName1", "distributed"],
+              ["vlanName2", "distributed"]
           ],
           [
-              [890, "t1"],
-              [987, "t2"]
+              [890, False],
+              [987, True]
           ],
           minionTemplate]
      ]
     ],
-    ["vmwareTemplateName", "group-2",
+    ["group-2", "vmwareTemplateName",
      [
          ["host1",4,8,["127.0.0.10","127.0.0.1","255.255.255.0","dns1","dns2"],
           [
@@ -59,39 +59,42 @@ params = [
      ]
     ]
 ]
+
 templateVM = ("  - {NAME}:\n    " +
               "num_cpus: {CPU}\n    " +
               "memory: {MEM}GB\n    " +
               "script_args: {ARGS}\n    " +
+              "devices:\n      "
+              "disk:{DISKS}\n      " +
               "network:{NET}\n    " +
-              "disks:{DISKS}\n    " +
               "minion: {MINION}")
 
 def createInterfaces(InterfaceParams):
     interfaces = "\n"
     i = 1
     for interfaceParam in InterfaceParams:
-        interfase = "    - interface" + str(i) + ":\n      vlan: {VLANNAME}\n      CONNECTED: {INSTATE}\n"
+        interfase = "        Network adapter " + str(i) + ":\n          name: {VLANNAME}\n          switch_type: {INSTATE}\n" + "          ip: 127.0.0.1\n          gateway: 127.0.0.1\n          subnet_mask: 255.255.255.0\n"
         interfaces = interfaces + interfase.format(VLANNAME=interfaceParam[0], INSTATE=interfaceParam[1])
         i += 1
     interfaces = interfaces[:-1]
     return interfaces
+
 def createDisks(diskParams):
     disks = "\n"
     i = 1;
     for diskparm in diskParams:
-        disk = "    - disk" + str(i) + ":\n      disksize: {DISKSIZE}\n      disktype: {DISKTIPE}\n"
+        disk = "        Hard disk " + str(i) + ":\n          size: {DISKSIZE}\n          thin_provision: {DISKTIPE}\n"
         disks = disks + disk.format(DISKSIZE=diskparm[0],DISKTIPE=diskparm[1])
         i += 1
     disks = disks[:-1]
     return disks
 
-def createVM(template, params):
-    script_args = " ".join(params[3])
-    interfaces = createInterfaces(params[4])
-    disks = createDisks(params[5])
-    minion = "\n" + params[6].format(MINIONNAME=(params[0] + "." + params[3][1]))
-    textfile = template.format(NAME=params[0],CPU=params[1],MEM=params[2],ARGS=script_args,NET=interfaces,DISKS=disks,MINION=minion) + "\n"
+def createVM(template, VMparams):
+    script_args = " ".join(VMparams[3])
+    interfaces = createInterfaces(VMparams[4])
+    disks = createDisks(VMparams[5])
+    minion = "\n" + VMparams[6].format(MINIONNAME=(VMparams[0] + "." + VMparams[3][1]))
+    textfile = template.format(NAME=VMparams[0],CPU=VMparams[1],MEM=VMparams[2],ARGS=script_args,NET=interfaces,DISKS=disks,MINION=minion) + "\n"
     return textfile
 
 def createVMs(template,params):
@@ -102,8 +105,8 @@ def createVMs(template,params):
     return textfile
 
 for groupVM in params:
-    finalvm = groupVM[0] + ":\n" + createVMs(templateVM, groupVM[2])
+    finalvm = groupVM[1] + ":\n" + createVMs(templateVM, groupVM[2])
     print(finalvm)
-    f = open(groupVM[1] + '.txt','w')  # открытие в режиме записи
+    f = open(groupVM[0] + '.txt','w')  # открытие в режиме записи
     f.write(finalvm)  # запись Hello World в файл
     f.close()  # закрытие файла
