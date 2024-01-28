@@ -1,8 +1,8 @@
-minionTemplate = "      master: somehost\n      minionName: {MINIONNAME}"
+minionTemplate = "      master: somehost\n      id: {MINIONNAME}"
 params = [
-    ["group-1",
+    ["vmwareTemplateName", "group-1",
      [
-         ["host1", 4, 32, ["127.0.0.10", "127.0.0.1", "255.255.255.0", "dns1", "dns2"],
+         ["VMname1", 4, 32, ["hostname1", "domain", "127.0.0.10", "255.255.255.0", "127.0.0.1", "dns_separated"],
           [
               ["vlanName1", True],
               ["vlanName2", True]
@@ -24,7 +24,7 @@ params = [
           minionTemplate]
      ]
     ],
-    ["group-2",
+    ["vmwareTemplateName", "group-2",
      [
          ["host1",4,8,["127.0.0.10","127.0.0.1","255.255.255.0","dns1","dns2"],
           [
@@ -60,12 +60,13 @@ params = [
     ]
 ]
 templateVM = ("  - {NAME}:\n    " +
-              "cpu: {CPU}\n    " +
-              "memory: {MEM}\n    " +
+              "num_cpus: {CPU}\n    " +
+              "memory: {MEM}GB\n    " +
               "script_args: {ARGS}\n    " +
               "network:{NET}\n    " +
               "disks:{DISKS}\n    " +
               "minion: {MINION}")
+
 def createInterfaces(InterfaceParams):
     interfaces = "\n"
     i = 1
@@ -89,7 +90,7 @@ def createVM(template, params):
     script_args = " ".join(params[3])
     interfaces = createInterfaces(params[4])
     disks = createDisks(params[5])
-    minion = "\n" + params[6].format(MINIONNAME=params[0])
+    minion = "\n" + params[6].format(MINIONNAME=(params[0] + "." + params[3][1]))
     textfile = template.format(NAME=params[0],CPU=params[1],MEM=params[2],ARGS=script_args,NET=interfaces,DISKS=disks,MINION=minion) + "\n"
     return textfile
 
@@ -101,8 +102,8 @@ def createVMs(template,params):
     return textfile
 
 for groupVM in params:
-    finalvm = groupVM[0] + ":\n" + createVMs(templateVM, groupVM[1])
+    finalvm = groupVM[0] + ":\n" + createVMs(templateVM, groupVM[2])
     print(finalvm)
-    f = open(groupVM[0] + '.txt','w')  # открытие в режиме записи
+    f = open(groupVM[1] + '.txt','w')  # открытие в режиме записи
     f.write(finalvm)  # запись Hello World в файл
     f.close()  # закрытие файла
