@@ -107,6 +107,6 @@ def createVMs(template,params):
 for groupVM in params:
     finalvm = groupVM[1] + ":\n" + createVMs(templateVM, groupVM[2])
     print(finalvm)
-    f = open(groupVM[0] + '.txt','w')  # открытие в режиме записи
-    f.write(finalvm)  # запись Hello World в файл
-    f.close()  # закрытие файла
+    f = open(groupVM[0] + '.txt','w')
+    f.write(finalvm)
+    f.close()

@@ -117,7 +117,6 @@ def createVMs(template, params):
     return textfile
 
 for key, value in params.items():
-    #finalvm =  value['vmwareTemplateName'] + ":\n" + createVMs(templateVM, value['VMparams'])
     finalvm =  value['vmwareTemplateName'] + ":\n" + createVMs(templateVM, value['VMparams'])
     print(finalvm)
     # f = open(groupVM[0] + '.txt','w')  # открытие в режиме записи
