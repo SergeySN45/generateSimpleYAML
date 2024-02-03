@@ -119,6 +119,6 @@ def createVMs(template, params):
 for key, value in params.items():
     finalvm =  value['vmwareTemplateName'] + ":\n" + createVMs(templateVM, value['VMparams'])
     print(finalvm)
-    # f = open(groupVM[0] + '.txt','w')  # открытие в режиме записи
-    # f.write(finalvm)  # запись Hello World в файл
-    # f.close()  # закрытие файла
+    f = open(key + '.txt','w')
+    f.write(finalvm)
+    f.close()
